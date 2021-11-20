@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>{% block title %}
+    <!-- title goes here -->{% endblock %}
+  </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link href="https://bootswatch.com/4/minty/bootstrap.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&display=swap" rel="stylesheet">
+  <link href="/static/madlibs.css" rel="stylesheet">
+
+</head>
+
+<body>
+  <div class="container" style="margin-top: 2em">
+    {% for msg in get_flashed_messages() %}
+    <div class="alert alert-danger">{{ msg }}</div>
+    {% endfor %}
+
+    {% block content %}
+    {% endblock %}
+  </div>
+</body>
+
+</html>

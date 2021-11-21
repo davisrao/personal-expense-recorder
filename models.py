@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
-from enum import Enum
+# from enum import Enum
+from flask import session
 
 db = SQLAlchemy()
 
@@ -13,16 +14,16 @@ def connect_db(app):
     db.app = app
     db.init_app(app)
 
-class CategoryOptions(Enum):
-    FOOD = 'Food & Drink'
-    TRAVEL = 'Travel'
-    HOME = 'Home Goods'
-    APPAREL = 'Apparel'
-    TRANSPORTATION = 'Transportation'
-    HOUSING = 'Rent / Housing'
-    UTILITIES = 'Utilities'
-    INSURANCE = 'Insurance'
-    MISC = 'Miscellaneous'
+# class CategoryOptions(Enum):
+#     FOOD = 'Food & Drink'
+#     TRAVEL = 'TRAVEL'
+#     HOME = 'Home Goods'
+#     APPAREL = 'Apparel'
+#     TRANSPORTATION = 'Transportation'
+#     HOUSING = 'Rent / Housing'
+#     UTILITIES = 'Utilities'
+#     INSURANCE = 'Insurance'
+#     MISC = 'Miscellaneous'
 
 
 class User(db.Model):
@@ -111,9 +112,11 @@ class Expense(db.Model):
         nullable=False
     )
 
-    category = db.Column(db.Enum(CategoryOptions,
-                                values_callable=lambda x: 
-                                [str(member.value) for member in CategoryOptions]))
+    category = db.Column(
+        db.String(300),
+        nullable=False
+    )
+
     owner = db.Column(
         db.String(20),
         db.ForeignKey('users.username')
@@ -124,10 +127,11 @@ class Expense(db.Model):
     @classmethod
     def create(cls, name, description, amount, category):
         """Register expense in the database w/"""
-
+        owner=session['username']
         return cls(
             name=name, 
             description=description, 
             amount=amount, 
             category=category, 
+            owner=owner
         )

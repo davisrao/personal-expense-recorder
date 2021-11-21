@@ -5,6 +5,7 @@ from models import connect_db, db, User, Expense
 from forms import RegisterForm, LoginForm, CSRFOnlyForm, ExpenseForm
 
 app = Flask(__name__)
+
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///personal_expense_app"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
@@ -19,7 +20,8 @@ toolbar = DebugToolbarExtension(app)
 @app.get("/")
 def homepage():
     """Redirects to the /register route."""
-    return render_template("homepage.html")
+    form = CSRFOnlyForm()
+    return render_template("homepage.html", form=form)
 
 
 #USER ROUTES
@@ -117,12 +119,13 @@ def add_expense(username):
         description = form.description.data
         amount = form.amount.data
         category = form.category.data
-        user = username
 
-        expense = Expense.create(name,description,amount,category,user)
+        breakpoint()
+        # expense = Expense.create(name,description,amount,category,user)
+        expense = Expense.create(name,description,amount,category)
         db.session.add(expense)
         db.session.commit()
         return redirect("/")
 
     else:
-        return render_template("login.html", form=form)
+        return render_template("add_expense.html", form=form)

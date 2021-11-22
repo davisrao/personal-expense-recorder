@@ -4,6 +4,8 @@ from flask_debugtoolbar import DebugToolbarExtension
 from models import connect_db, db, User, Expense
 from forms import RegisterForm, LoginForm, CSRFOnlyForm, ExpenseForm
 
+import functools
+
 app = Flask(__name__)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///personal_expense_app"
@@ -111,6 +113,10 @@ def login():
 @app.route("/expenses/<username>/add", methods=["GET", "POST"])
 def add_expense(username):
     """Produce login form or handle login."""
+        
+    if "username" not in session:
+        flash("You must be logged in to view!")
+        return redirect("/login")
 
     form = ExpenseForm()
 
@@ -129,3 +135,28 @@ def add_expense(username):
 
     else:
         return render_template("add_expense.html", form=form)
+
+@app.get("/summary/<username>")
+def expense_summary(username):
+    """hidden page for logged-in users only."""
+
+    if "username" not in session:
+        flash("You must be logged in to view!")
+        return redirect("/login")
+
+    else:
+        form=CSRFOnlyForm()
+
+        # get list of all the expenses for a given user
+        expenses_query_data = Expense.query.filter_by(owner=username).all()
+        # boil them down to just their amounts
+        expenses = [e.amount for e in expenses_query_data]
+        # get total
+        total_expenses = functools.reduce(lambda a, b: a+b, expenses)
+
+        #TODO: add in a drop down list item that lets you pick the category you want to see. 
+        #Top will show total expenses, bottom section can show the specific category and how it plays in to the total
+        # look up some cool data visualization tools with python.
+
+
+        return render_template("expense_summary.html", total_expenses=total_expenses,form=form)

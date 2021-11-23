@@ -1,8 +1,11 @@
+from datetime import datetime
 from flask import Flask, render_template, redirect, session, flash
 from flask_debugtoolbar import DebugToolbarExtension
 
 from models import connect_db, db, User, Expense
 from forms import RegisterForm, LoginForm, CSRFOnlyForm, ExpenseForm
+
+from sqlalchemy import extract
 
 import functools
 
@@ -148,12 +151,14 @@ def expense_summary(username):
         form=CSRFOnlyForm()
 
         # get list of all the expenses for a given user
-        expenses_query_data = Expense.query.filter_by(owner=username).all()
+        breakpoint()
+        expenses_query_data = Expense.query.filter((Expense.owner == username),(extract('month',Expense.time_added) == datetime.now().month)).all()
+                                               
         # boil them down to just their amounts
         expenses = [e.amount for e in expenses_query_data]
         # get total
         total_expenses = functools.reduce(lambda a, b: a+b, expenses)
-
+        
         #TODO: add in a drop down list item that lets you pick the category you want to see. 
         #Top will show total expenses, bottom section can show the specific category and how it plays in to the total
         # look up some cool data visualization tools with python.

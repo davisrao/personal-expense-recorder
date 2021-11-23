@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 # from enum import Enum
@@ -117,6 +118,10 @@ class Expense(db.Model):
         nullable=False
     )
 
+    time_added = db.Column(
+        db.DateTime()
+    )
+
     owner = db.Column(
         db.String(20),
         db.ForeignKey('users.username')
@@ -133,5 +138,6 @@ class Expense(db.Model):
             description=description, 
             amount=amount, 
             category=category, 
+            time_added=datetime.now(),
             owner=owner
         )

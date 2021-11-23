@@ -1,9 +1,49 @@
 {% extends 'base.html' %}
 {% block content %}
+<form method="GET">
 
-      <p class="">
-        The total expenses you have added:
+    {{ form.hidden_tag() }}
+
+    {% for field in form
+    if field.widget.input_type != 'hidden' %}
+    <p>
+        {{ field.label }}
+        {{ field }}
+
+        {% for error in field.errors %}
+        {{ error }}
+        {% endfor %}
+    </p>
+    {% endfor %}
+
+    <button type="submit">See Category</button>
+
+</form>
+<div>
+    <p class="">
+        Total Monthly Expenses:
         ${{total_expenses}}
-      </p>
+    </p>
+</div>
+
+{% if selected_category != None %}
+<div>
+    <p class="">
+        Total Expenses for {{selected_category}}:
+        ${{total_category_expenses}}
+    </p>
+    {% else %}
+    <p class="">
+        Select a category above to see details!
+    </p>
+    {% endif %}
+    {% if total_category_expenses != 0 %}
+    <p class="">
+        {{selected_category}} as % of total:
+        {{ (total_category_expenses / total_expenses) * 100 }}%
+    </p>
+
+    {% endif %}
+</div>
 
 {% endblock %}

@@ -17,7 +17,7 @@
     {% if 'username' in session %}
     <a href="/expenses/{{session.username}}/add"><span class="navbar-brand mb-0 h1">New Expense</span></a>
     <form action="/logout" method="POST">
-      {{form.hidden_tag()}}
+      {{logout_form.hidden_tag()}}
       <button class="btn btn-danger">Logout</button>
     </form>
     {% else %} 
@@ -26,7 +26,7 @@
 
     {% endif %}
   </nav>
-  <div class="container d-flex justify-content-center" style="margin-top: 2em">
+  <div class="container justify-content-center" style="margin-top: 2em">
     {% for msg in get_flashed_messages() %}
     <div class="alert alert-danger">{{ msg }}</div>
     {% endfor %}

@@ -1,9 +1,9 @@
 from datetime import datetime
-from flask import Flask, render_template, redirect, session, flash
+from flask import Flask, render_template, redirect, session, flash, request
 from flask_debugtoolbar import DebugToolbarExtension
 
 from models import connect_db, db, User, Expense
-from forms import RegisterForm, LoginForm, CSRFOnlyForm, ExpenseForm
+from forms import CategorySelectionForm, RegisterForm, LoginForm, CSRFOnlyForm, ExpenseForm
 
 from sqlalchemy import extract
 
@@ -25,8 +25,9 @@ toolbar = DebugToolbarExtension(app)
 @app.get("/")
 def homepage():
     """Redirects to the /register route."""
-    form = CSRFOnlyForm()
-    return render_template("homepage.html", form=form)
+    logout_form = CSRFOnlyForm()
+
+    return render_template("homepage.html", logout_form=logout_form)
 
 
 #USER ROUTES
@@ -41,9 +42,9 @@ def secret(username):
 
     else:
         user = User.query.get_or_404(username)
-        form = CSRFOnlyForm()
+        logout_form = CSRFOnlyForm()
 
-        return render_template("user_info.html", user=user, form=form)
+        return render_template("user_info.html", user=user, logout_form=logout_form)
 
 
 @app.post("/logout")
@@ -62,6 +63,8 @@ def register():
     """Register user: produce form & handle form submission."""
 
     form = RegisterForm()
+    logout_form=CSRFOnlyForm()
+
 
     if form.validate_on_submit():
         email = form.email.data
@@ -85,7 +88,7 @@ def register():
         return redirect(f"/users/{username}")
 
     else:
-        return render_template("register.html", form=form)
+        return render_template("register.html", form=form,logout_form=logout_form)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -93,6 +96,8 @@ def login():
     """Produce login form or handle login."""
 
     form = LoginForm()
+    logout_form=CSRFOnlyForm()
+
 
     if form.validate_on_submit():
         username = form.username.data
@@ -106,7 +111,7 @@ def login():
         else:
             form.username.errors = ["Bad name/password"]
 
-    return render_template("login.html", form=form)
+    return render_template("login.html", form=form,logout_form=logout_form)
 
 
 
@@ -122,6 +127,7 @@ def add_expense(username):
         return redirect("/login")
 
     form = ExpenseForm()
+    logout_form=CSRFOnlyForm()
 
     if form.validate_on_submit():
         name = form.name.data
@@ -137,7 +143,7 @@ def add_expense(username):
         return redirect("/")
 
     else:
-        return render_template("add_expense.html", form=form)
+        return render_template("add_expense.html", logout_form=logout_form,form=form)
 
 @app.get("/summary/<username>")
 def expense_summary(username):
@@ -148,20 +154,37 @@ def expense_summary(username):
         return redirect("/login")
 
     else:
-        form=CSRFOnlyForm()
-
+        logout_form=CSRFOnlyForm()
+        form=CategorySelectionForm()
+        todays_month=datetime.now().month
         # get list of all the expenses for a given user
-        breakpoint()
-        expenses_query_data = Expense.query.filter((Expense.owner == username),(extract('month',Expense.time_added) == datetime.now().month)).all()
+        expenses_query_data = Expense.query.filter((Expense.owner == username),(extract('month',Expense.time_added) == todays_month)).all()
                                                
         # boil them down to just their amounts
         expenses = [e.amount for e in expenses_query_data]
         # get total
-        total_expenses = functools.reduce(lambda a, b: a+b, expenses)
+
+        if expenses == []:
+            total_expenses = 0
+        else:
+            total_expenses = functools.reduce(lambda a, b: a+b, expenses)
         
-        #TODO: add in a drop down list item that lets you pick the category you want to see. 
-        #Top will show total expenses, bottom section can show the specific category and how it plays in to the total
-        # look up some cool data visualization tools with python.
+        # get the selected category
+        selected_category = request.args.get('category')
 
+        # grab the category expenses, and get the list of amounts
+        category_expense_query_data = Expense.query.filter((Expense.owner == username),(Expense.category == selected_category),(extract('month',Expense.time_added) == todays_month)).all()
+        category_expenses = [e.amount for e in category_expense_query_data]
 
-        return render_template("expense_summary.html", total_expenses=total_expenses,form=form)
+        # if that list is empty, set total to 0. Otherwise, get the sum
+        if category_expenses == []:
+            total_category_expenses=0
+        else:
+            total_category_expenses = functools.reduce(lambda a, b: a+b, category_expenses)
+
+        return render_template("expense_summary.html", 
+                                total_expenses=total_expenses,
+                                logout_form=logout_form,
+                                form=form, 
+                                selected_category=selected_category,
+                                total_category_expenses=total_category_expenses)

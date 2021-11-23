@@ -20,19 +20,31 @@ class LoginForm(FlaskForm):
     username = StringField("Username", validators=[InputRequired()])
     password = PasswordField("Password", validators=[InputRequired()])
 
+
+class CategorySelectionForm(FlaskForm):
+    """Form for registering a user."""
+    category = SelectField("Category", choices=[('Food & Drink', 'Food & Drink'), 
+                                            ('Travel', 'Travel'), 
+                                            ('Home Goods', 'Home Goods'),
+                                            ('Apparel', 'Apparel'),
+                                            ('Transportation', 'Transportation'),
+                                            ('Housing', 'Housing'),
+                                            ('Utilities', 'Utilities'),
+                                            ('Miscellaneous', 'Miscellaneous')])
+
 class ExpenseForm(FlaskForm):
     """Form for recording a expense"""
     name = StringField("Name", validators=[InputRequired()])
     description = TextAreaField("Description", validators=[InputRequired()])
     amount = DecimalField("Amount", validators=[InputRequired()])
-    category = SelectField("Category", choices=[('FOOD', 'Food & Drink'), 
-                                                ('TRAVEL', 'Travel'), 
-                                                ('HOME', 'Home Goods'),
-                                                ('APPAREL', 'Apparel'),
-                                                ('TRANSPORTATION', 'Transportation'),
-                                                ('HOUSING', 'Housing'),
-                                                ('UTILITIES', 'Utilities'),
-                                                ('MISC', 'Miscellaneous')])
+    category = SelectField("Category", choices=[('Food & Drink', 'Food & Drink'), 
+                                            ('Travel', 'Travel'), 
+                                            ('Home Goods', 'Home Goods'),
+                                            ('Apparel', 'Apparel'),
+                                            ('Transportation', 'Transportation'),
+                                            ('Housing', 'Housing'),
+                                            ('Utilities', 'Utilities'),
+                                            ('Miscellaneous', 'Miscellaneous')])
 
 class CSRFOnlyForm(FlaskForm):
     """For CSRF protection only."""

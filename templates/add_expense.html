@@ -1,29 +1,30 @@
 {% extends 'base.html' %}
 {% block content %}
-<div>
-    <h1 class="display-4">New Expense</h1>
-    <p class="lead">Add an expense</p>
-</div>
-<div>
-    <form method="POST">
+<div class="container justify-content-center row">
 
-        {{ form.hidden_tag() }}
+    <div class="col-6 justify-content-center">
+        <h1 class="display-4">New Expense</h1>
+        <p class="lead">Add an expense</p>
+        <form method="POST">
 
-        {% for field in form
-        if field.widget.input_type != 'hidden' %}
-        <p>
-            {{ field.label }}
-            {{ field }}
+            {{ form.hidden_tag() }}
 
-            {% for error in field.errors %}
-            {{ error }}
+            {% for field in form
+            if field.widget.input_type != 'hidden' %}
+            <p class="col-6">
+                {{ field.label }}
+                {{ field }}
+
+                {% for error in field.errors %}
+                {{ error }}
+                {% endfor %}
+            </p>
             {% endfor %}
-        </p>
-        {% endfor %}
 
-        <button type="submit">Post Expense</button>
+            <button type="submit">Post Expense</button>
 
-    </form>
+        </form>
+    </div>
 </div>
 
 {% endblock %}

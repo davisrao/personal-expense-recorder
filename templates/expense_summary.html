@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
+<div class="container justify-content-center">
 <form method="GET">
 
     {{ form.hidden_tag() }}
@@ -17,14 +18,32 @@
     {% endfor %}
 
     <button type="submit">See Category</button>
-
 </form>
-<div>
-    <p class="">
+
+<div class="row">
+    <p class="col-4">
         Total Monthly Expenses:
         ${{total_expenses}}
     </p>
 </div>
+<i class="row">
+    <i class="col-4">
+        Food Expenses:
+        ${{total_expenses}}
+    </i>
+</i>
+<i class="row">
+    <i class="col-4">
+        Travel Expenses:
+        ${{total_expenses}}
+    </i>
+</i>
+<i class="row">
+    <i class="col-4">
+        Home Expenses:
+        ${{total_expenses}}
+    </i>
+</i>
 
 {% if selected_category != None %}
 <div>
@@ -33,6 +52,7 @@
         ${{total_category_expenses}}
     </p>
     {% else %}
+    <h4>Category Summary</h4>
     <p class="">
         Select a category above to see details!
     </p>
@@ -45,5 +65,5 @@
 
     {% endif %}
 </div>
-
+</div>
 {% endblock %}

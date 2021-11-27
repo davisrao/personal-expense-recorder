@@ -5,6 +5,8 @@ from flask_debugtoolbar import DebugToolbarExtension
 from models import connect_db, db, User, Expense
 from forms import CategorySelectionForm, RegisterForm, LoginForm, CSRFOnlyForm, ExpenseForm
 
+from helpers import sum_expenses, calculate_stats_for_category
+
 from sqlalchemy import extract
 
 import functools
@@ -158,23 +160,17 @@ def expense_summary(username):
         form=CategorySelectionForm()
         todays_month=datetime.now().month
         # get list of all the expenses for a given user
-        expenses_query_data = Expense.query.filter((Expense.owner == username),(extract('month',Expense.time_added) == todays_month)).all()
+        expenses_query_data = db.session.query(Expense.category, db.func.sum(Expense.amount)).filter((extract('month',Expense.time_added) == todays_month)).group_by(Expense.category).all()
 
-        breakpoint()
-        # make expenses a dictionary of each type rather than a sum of the totals in an array.
-        # then we can still handle this the same way but do it by reducing a dictionary rather than a list
-        # here is a stack overflow on how to reduce a dictionary
-        # to get first expense, it would be expenses[0].category:expenses[0].amount 
+        # make expenses a dictionary which can be passed to a template
+        expenses = dict(expenses_query_data)
 
-        # boil them down to just their amounts
-        expenses = [e.amount for e in expenses_query_data]
-        # get total
-
-        if expenses == []:
+        if expenses == {}:
             total_expenses = 0
         else:
-            total_expenses = functools.reduce(lambda a, b: a+b, expenses)
+            total_expenses = sum_expenses(expenses)
         
+
         # get the selected category
         selected_category = request.args.get('category')
 
@@ -182,15 +178,17 @@ def expense_summary(username):
         category_expense_query_data = Expense.query.filter((Expense.owner == username),(Expense.category == selected_category),(extract('month',Expense.time_added) == todays_month)).all()
         category_expenses = [e.amount for e in category_expense_query_data]
 
+        category_stats= calculate_stats_for_category(category_expenses)
         # if that list is empty, set total to 0. Otherwise, get the sum
         if category_expenses == []:
             total_category_expenses=0
         else:
             total_category_expenses = functools.reduce(lambda a, b: a+b, category_expenses)
-
+        
         return render_template("expense_summary.html", 
                                 total_expenses=total_expenses,
+                                expenses=expenses,
                                 logout_form=logout_form,
                                 form=form, 
                                 selected_category=selected_category,
-                                total_category_expenses=total_category_expenses)
+                                category_stats=category_stats)

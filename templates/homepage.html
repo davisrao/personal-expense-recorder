@@ -3,9 +3,10 @@
 
       <p>
         {% if 'username' in session %}
-        <h1>WELCOME BACK!</h1>
+        <h1>Welcome back to ExpenseMe!</h1>
         {% else %}
-        <h1>WELCOME FOR ONCE!</h1>
+        <h1>Welcome to ExpenseMe!</h1>
+        <h4>Log in or sign up to continue</h4>
         <a href="/login"><button>Log In</button></a>
         <a href="/register"><button>Sign Up</button></a>
         {% endif %}

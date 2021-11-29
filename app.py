@@ -9,8 +9,6 @@ from helpers import sum_expenses, calculate_stats_for_category
 
 from sqlalchemy import extract
 
-import functools
-
 app = Flask(__name__)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///personal_expense_app"
@@ -29,13 +27,16 @@ def homepage():
     """Redirects to the /register route."""
     logout_form = CSRFOnlyForm()
 
-    return render_template("homepage.html", logout_form=logout_form)
+    if "username" in session:
+        return redirect(f"/summary/{session['username']}")
+    else:
+        return render_template("homepage.html", logout_form=logout_form)
 
 
 #USER ROUTES
 ############################################################################################################
 @app.get("/users/<username>")
-def secret(username):
+def user_detail(username):
     """hidden page for logged-in users only."""
 
     if "username" not in session:
@@ -46,7 +47,19 @@ def secret(username):
         user = User.query.get_or_404(username)
         logout_form = CSRFOnlyForm()
 
-        return render_template("user_info.html", user=user, logout_form=logout_form)
+        todays_month=datetime.now().month
+        expenses_query_data = db.session.query(Expense.category, db.func.sum(Expense.amount)).filter((extract('month',Expense.time_added) == todays_month)).group_by(Expense.category).all()
+        expenses = dict(expenses_query_data)
+
+
+        if expenses == {}:
+            total_expenses = 0
+        else:
+            total_expenses = sum_expenses(expenses)
+
+        return render_template("user_info.html", user=user, 
+                                                logout_form=logout_form,
+                                                total_expenses=total_expenses)
 
 
 @app.post("/logout")
@@ -137,7 +150,6 @@ def add_expense(username):
         amount = form.amount.data
         category = form.category.data
 
-        breakpoint()
         # expense = Expense.create(name,description,amount,category,user)
         expense = Expense.create(name,description,amount,category)
         db.session.add(expense)
@@ -150,10 +162,12 @@ def add_expense(username):
 @app.get("/summary/<username>")
 def expense_summary(username):
     """hidden page for logged-in users only."""
+    
+    user = User.query.get_or_404(username)
 
-    if "username" not in session:
-        flash("You must be logged in to view!")
-        return redirect("/login")
+    if username != user.username:
+        flash("Invalid credentials")
+        return redirect(f"/users/{username}")
 
     else:
         logout_form=CSRFOnlyForm()
@@ -179,11 +193,6 @@ def expense_summary(username):
         category_expenses = [e.amount for e in category_expense_query_data]
 
         category_stats= calculate_stats_for_category(category_expenses)
-        # if that list is empty, set total to 0. Otherwise, get the sum
-        if category_expenses == []:
-            total_category_expenses=0
-        else:
-            total_category_expenses = functools.reduce(lambda a, b: a+b, category_expenses)
         
         return render_template("expense_summary.html", 
                                 total_expenses=total_expenses,

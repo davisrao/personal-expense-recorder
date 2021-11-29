@@ -1,77 +1,81 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container justify-content-center">
-<form method="GET">
-
-    {{ form.hidden_tag() }}
-
-    {% for field in form
-    if field.widget.input_type != 'hidden' %}
-    <p>
-        {{ field.label }}
-        {{ field }}
-
-        {% for error in field.errors %}
-        {{ error }}
-        {% endfor %}
-    </p>
-    {% endfor %}
-
-    <button type="submit">See Category</button>
-</form>
 
 <div class="row">
-    <p class="col-4">
+    <div class="col-12">
+        <form method="GET">
+
+            {{ form.hidden_tag() }}
+        
+            {% for field in form
+            if field.widget.input_type != 'hidden' %}
+            <p>
+                {{ field.label }}
+                {{ field }}
+        
+                {% for error in field.errors %}
+                {{ error }}
+                {% endfor %}
+            </p>
+            {% endfor %}
+        
+            <button type="submit">See Category</button>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    <p class="col-12">
         Total Monthly Expenses:
         ${{total_expenses}}
     </p>
 </div>
 
-<i class="row">
-    <i class="col-4">
+<div class="row">
+    <i class="col-3 border border-primary ml-auto">
         Food Expenses:
         ${{expenses['Food & Drink']}}
     </i>
-    <i class="col-4">
+    <i class="col-3 border border-primary ml-auto">
         Travel Expenses:
         ${{expenses['Travel']}}
     </i>
-    <i class="col-4">
+    <i class="col-3 border border-primary ml-auto">
         Home Expenses:
         ${{expenses['Home Goods']}}
     </i>
-    <i class="col-4">
+    <i class="col-3 border border-primary ml-auto">
         Apparel Expenses:
         ${{expenses['Apparel']}}
     </i>
-    <i class="col-4">
+    <i class="col-3 border border-primary ml-auto">
         Transportation Expenses:
         ${{expenses['Transportation']}}
     </i>
-    <i class="col-4">
+    <i class="col-3 border border-primary ml-auto">
         Housing Expenses:
         ${{expenses['Housing']}}
     </i>
-    <i class="col-4">
+    <i class="col-3 border border-primary ml-auto">
         Utilities Expenses:
         ${{expenses['Utilities']}}
     </i>
-    <i class="col-4">
+    <i class="col-3 border border-primary ml-auto">
         Miscellaneous Expenses:
         ${{expenses['Miscellaneous']}}
     </i>
-</i>
+</div>
 
 
 {% if selected_category != None %}
-<div class="row">
+<div class="row mt-4">
     <h4 class="col-12">Category Summary</h4>
     <p class="col-12">
         Total Expenses for {{selected_category}}:
         ${{category_stats['expense_sum']}}
     </p>
     {% else %}
-    <p class="col-12">
+    <p class="col-12 mt-4">
         Select a category above to see details!
     </p>
     {% endif %}
@@ -81,10 +85,14 @@
         {{ ((category_stats['expense_sum'] / total_expenses) * 100)|round(1) }}%
     </p>
     <p class="col-12">
+        Average expense size:
+        ${{ ((category_stats['expense_sum'] / category_stats['expense_count']))|round(2) }}
+    </p>
+    <p class="col-12">
         # of recorded Expenses:
         {{ category_stats['expense_count']}}
     </p>
     {% endif %}
 </div>
-</div>
+
 {% endblock %}

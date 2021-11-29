@@ -27,13 +27,16 @@
     {% endif %}
   </nav>
   <div class="container justify-content-center" style="margin-top: 2em">
-    {% for msg in get_flashed_messages() %}
-    <div class="alert alert-danger">{{ msg }}</div>
-    {% endfor %}
+    <div class="row">
+      {% for msg in get_flashed_messages() %}
+      <div class="alert alert-danger">{{ msg }}</div>
+      {% endfor %}
+    </div>
+      {% block content %}
+      {% endblock %}
 
-    {% block content %}
-    {% endblock %}
-  </div>
+    </div>
+
 </body>
 
 </html>
